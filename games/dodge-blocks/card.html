@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Dodge Blocks</title>
+
+<style>
+body {
+    margin: 0;
+    background: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    font-family: Arial, sans-serif;
+}
+
+/* الكرت */
+.game-card {
+    width: 380px;
+    background: rgba(255,255,255,0.12);
+    backdrop-filter: blur(12px);
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 0 40px rgba(0,0,0,0.4);
+    text-align: center;
+    color: white;
+}
+
+/* زر */
+button {
+    background: #00eaff;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 30px;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 15px;
+}
+
+/* شاشة اللعبة */
+#gameWrapper {
+    display: none;
+    position: relative;
+}
+
+canvas {
+    border-radius: 16px;
+    background: rgba(255,255,255,0.08);
+}
+
+/* سكور */
+#score {
+    position: absolute;
+    top: 10px;
+    left: 15px;
+    font-size: 18px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="game-card">
+    <h2>Dodge Blocks</h2>
+    <p>تفادى العوائق لأطول وقت ممكن</p>
+    <button onclick="startGame()">Play</button>
+
+    <div id="gameWrapper">
+        <div id="score">Score: 0</div>
+        <canvas id="game" width="340" height="520"></canvas>
+    </div>
+</div>
+
+<!-- أصوات -->
+<audio id="hitSound" src="https://assets.mixkit.co/sfx/preview/mixkit-arcade-retro-game-over-213.wav"></audio>
+
+<script>
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+const scoreEl = document.getElementById("score");
+const hitSound = document.getElementById("hitSound");
+
+let player, blocks, score, running;
+
+// بدء اللعبة
+function startGame() {
+    document.querySelector("button").style.display = "none";
+    document.getElementById("gameWrapper").style.display = "block";
+
+    player = { x: 170, y: 460, r: 14 };
+    blocks = [];
+    score = 0;
+    running = true;
+
+    loop();
+    setInterval(spawnBlock, 900);
+}
+
+// تحكم
+document.addEventListener("mousemove", e => {
+    const rect = canvas.getBoundingClientRect();
+    player.x = e.clientX - rect.left;
+});
+
+// إنشاء عائق
+function spawnBlock() {
+    if (!running) return;
+    blocks.push({
+        x: Math.random() * (canvas.width - 30),
+        y: -30,
+        s: 30,
+        v: 3 + Math.random() * 2
+    });
+}
+
+// رسم اللاعب
+function drawPlayer() {
+    ctx.beginPath();
+    ctx.arc(player.x, player.y, player.r, 0, Math.PI*2);
+    ctx.fillStyle = "#00eaff";
+    ctx.shadowBlur = 15;
+    ctx.shadowColor = "#00eaff";
+    ctx.fill();
+    ctx.shadowBlur = 0;
+}
+
+// رسم العوائق
+function drawBlocks() {
+    ctx.fillStyle = "#ff5f5f";
+    blocks.forEach(b => ctx.fillRect(b.x, b.y, b.s, b.s));
+}
+
+// اللوب
+function loop() {
+    if (!running) return;
+
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    drawPlayer();
+    drawBlocks();
+
+    blocks.forEach(b => {
+        b.y += b.v;
+
+        if (
+            b.x < player.x + player.r &&
+            b.x + b.s > player.x - player.r &&
+            b.y < player.y + player.r &&
+            b.y + b.s > player.y - player.r
+        ) {
+            hitSound.play();
+            running = false;
+            alert("Game Over\nScore: " + score);
+            location.reload();
+        }
+    });
+
+    blocks = blocks.filter(b => b.y < canvas.height + 40);
+    score++;
+    scoreEl.textContent = "Score: " + score;
+
+    requestAnimationFrame(loop);
+}
+</script>
+
+</body>
+</html>
