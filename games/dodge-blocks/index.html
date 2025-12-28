@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Dodge Blocks</title>
+<style>
+    body {
+        margin: 0;
+        background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        overflow: hidden;
+        font-family: Arial, sans-serif;
+    }
+
+    canvas {
+        background: rgba(255,255,255,0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        box-shadow: 0 0 30px rgba(0,0,0,0.4);
+    }
+</style>
+</head>
+<body>
+
+<canvas id="game" width="360" height="600"></canvas>
+
+<script>
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+let player = {
+    x: 180,
+    y: 520,
+    r: 15,
+    speed: 6
+};
+
+let blocks = [];
+let score = 0;
+let gameOver = false;
+
+// التحكم
+document.addEventListener("mousemove", e => {
+    const rect = canvas.getBoundingClientRect();
+    player.x = e.clientX - rect.left;
+});
+
+document.addEventListener("touchmove", e => {
+    const rect = canvas.getBoundingClientRect();
+    player.x = e.touches[0].clientX - rect.left;
+});
+
+// إنشاء عائق
+function spawnBlock() {
+    blocks.push({
+        x: Math.random() * (canvas.width - 30),
+        y: -30,
+        size: 30,
+        speed: 3 + Math.random() * 2
+    });
+}
+
+// رسم اللاعب
+function drawPlayer() {
+    ctx.beginPath();
+    ctx.arc(player.x, player.y, player.r, 0, Math.PI * 2);
+    ctx.fillStyle = "#00eaff";
+    ctx.fill();
+}
+
+// رسم العوائق
+function drawBlocks() {
+    ctx.fillStyle = "#ff5f5f";
+    blocks.forEach(b => {
+        ctx.fillRect(b.x, b.y, b.size, b.size);
+    });
+}
+
+// تحديث
+function update() {
+    if (gameOver) return;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    drawPlayer();
+    drawBlocks();
+
+    blocks.forEach(b => {
+        b.y += b.speed;
+
+        // تصادم
+        if (
+            b.x < player.x + player.r &&
+            b.x + b.size > player.x - player.r &&
+            b.y < player.y + player.r &&
+            b.y + b.size > player.y - player.r
+        ) {
+            gameOver = true;
+            alert("Game Over! Score: " + score);
+            location.reload();
+        }
+    });
+
+    blocks = blocks.filter(b => b.y < canvas.height + 50);
+    score++;
+    requestAnimationFrame(update);
+}
+
+// بداية اللعبة
+setInterval(spawnBlock, 900);
+update();
+</script>
+
+</body>
+</html>
+
