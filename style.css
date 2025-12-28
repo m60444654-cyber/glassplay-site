@@ -130,3 +130,10 @@ footer {
   margin-bottom: 10px;
   filter: drop-shadow(0 0 10px rgba(0,234,255,0.6));
 }
+
+
+.game-icon {
+  font-size: 42px;
+  margin-bottom: 10px;
+  filter: drop-shadow(0 0 10px rgba(0,234,255,0.6));
+}
