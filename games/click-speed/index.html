@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Click Speed</title>
+<style>
+    body {
+        margin: 0;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+        font-family: Arial, sans-serif;
+        color: white;
+    }
+
+    .glass {
+        background: rgba(255,255,255,0.15);
+        backdrop-filter: blur(15px);
+        border-radius: 20px;
+        padding: 40px;
+        text-align: center;
+        box-shadow: 0 0 30px rgba(0,0,0,0.3);
+        width: 300px;
+    }
+
+    button {
+        margin-top: 20px;
+        padding: 15px 30px;
+        font-size: 18px;
+        border: none;
+        border-radius: 50px;
+        cursor: pointer;
+        background: rgba(255,255,255,0.25);
+        color: white;
+    }
+
+    button:hover {
+        background: rgba(255,255,255,0.4);
+    }
+</style>
+</head>
+
+<body>
+
+<div class="glass">
+    <h1>Click Speed</h1>
+    <p>Clicks: <span id="score">0</span></p>
+    <p>Time: <span id="time">5</span>s</p>
+    <button id="btn">Click Me!</button>
+</div>
+
+<script>
+let score = 0;
+let time = 5;
+let started = false;
+
+const btn = document.getElementById("btn");
+const scoreEl = document.getElementById("score");
+const timeEl = document.getElementById("time");
+
+btn.onclick = () => {
+    if (!started) {
+        started = true;
+        const timer = setInterval(() => {
+            time--;
+            timeEl.textContent = time;
+            if (time === 0) {
+                clearInterval(timer);
+                btn.disabled = true;
+                btn.textContent = "Finished!";
+            }
+        }, 1000);
+    }
+
+    if (time > 0) {
+        score++;
+        scoreEl.textContent = score;
+    }
+};
+</script>
+
+</body>
+</html>
