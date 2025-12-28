@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<title>Dodge Blocks</title>
+<title>Dodge Blocks | GlassPlay</title>
 
 <style>
 body {
@@ -13,48 +13,59 @@ body {
     align-items: center;
     height: 100vh;
     font-family: Arial, sans-serif;
-}
-
-/* الكرت */
-.game-card {
-    width: 380px;
-    background: rgba(255,255,255,0.12);
-    backdrop-filter: blur(12px);
-    border-radius: 20px;
-    padding: 20px;
-    box-shadow: 0 0 40px rgba(0,0,0,0.4);
-    text-align: center;
     color: white;
 }
 
-/* زر */
+/* كارت اللعبة */
+.game-card {
+    width: 380px;
+    background: rgba(255,255,255,0.1);
+    backdrop-filter: blur(14px);
+    border-radius: 24px;
+    padding: 22px;
+    box-shadow: 0 20px 45px rgba(0,0,0,0.4);
+    text-align: center;
+}
+
+/* أزرار */
 button {
     background: #00eaff;
     border: none;
-    padding: 12px 30px;
+    padding: 12px 34px;
     border-radius: 30px;
     font-size: 16px;
     cursor: pointer;
     margin-top: 15px;
+    transition: 0.2s;
+}
+button:hover {
+    transform: scale(1.05);
 }
 
 /* شاشة اللعبة */
 #gameWrapper {
     display: none;
     position: relative;
+    margin-top: 15px;
 }
 
 canvas {
-    border-radius: 16px;
+    border-radius: 18px;
     background: rgba(255,255,255,0.08);
 }
 
-/* سكور */
+/* السكور */
 #score {
     position: absolute;
     top: 10px;
     left: 15px;
     font-size: 18px;
+}
+
+/* Game Over */
+#gameOver {
+    display: none;
+    margin-top: 10px;
 }
 </style>
 </head>
@@ -64,15 +75,22 @@ canvas {
 <div class="game-card">
     <h2>Dodge Blocks</h2>
     <p>تفادى العوائق لأطول وقت ممكن</p>
-    <button onclick="startGame()">Play</button>
+
+    <button id="startBtn" onclick="startGame()">Play</button>
 
     <div id="gameWrapper">
         <div id="score">Score: 0</div>
         <canvas id="game" width="340" height="520"></canvas>
     </div>
+
+    <div id="gameOver">
+        <h3>Game Over</h3>
+        <p id="finalScore"></p>
+        <button onclick="restart()">Restart</button>
+    </div>
 </div>
 
-<!-- أصوات -->
+<!-- صوت -->
 <audio id="hitSound" src="https://assets.mixkit.co/sfx/preview/mixkit-arcade-retro-game-over-213.wav"></audio>
 
 <script>
@@ -80,30 +98,33 @@ const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 const scoreEl = document.getElementById("score");
 const hitSound = document.getElementById("hitSound");
+const gameOverBox = document.getElementById("gameOver");
+const finalScore = document.getElementById("finalScore");
 
-let player, blocks, score, running;
+let player, blocks, score, running, spawnTimer;
 
 // بدء اللعبة
 function startGame() {
-    document.querySelector("button").style.display = "none";
+    document.getElementById("startBtn").style.display = "none";
     document.getElementById("gameWrapper").style.display = "block";
+    gameOverBox.style.display = "none";
 
     player = { x: 170, y: 460, r: 14 };
     blocks = [];
     score = 0;
     running = true;
 
+    spawnTimer = setInterval(spawnBlock, 900);
     loop();
-    setInterval(spawnBlock, 900);
 }
 
-// تحكم
+// تحكم بالماوس
 document.addEventListener("mousemove", e => {
     const rect = canvas.getBoundingClientRect();
     player.x = e.clientX - rect.left;
 });
 
-// إنشاء عائق
+// إنشاء العوائق
 function spawnBlock() {
     if (!running) return;
     blocks.push({
@@ -117,7 +138,7 @@ function spawnBlock() {
 // رسم اللاعب
 function drawPlayer() {
     ctx.beginPath();
-    ctx.arc(player.x, player.y, player.r, 0, Math.PI*2);
+    ctx.arc(player.x, player.y, player.r, 0, Math.PI * 2);
     ctx.fillStyle = "#00eaff";
     ctx.shadowBlur = 15;
     ctx.shadowColor = "#00eaff";
@@ -131,11 +152,26 @@ function drawBlocks() {
     blocks.forEach(b => ctx.fillRect(b.x, b.y, b.s, b.s));
 }
 
+// نهاية اللعبة
+function endGame() {
+    running = false;
+    clearInterval(spawnTimer);
+    hitSound.play();
+
+    finalScore.textContent = "Score: " + score;
+    gameOverBox.style.display = "block";
+}
+
+// إعادة التشغيل
+function restart() {
+    startGame();
+}
+
 // اللوب
 function loop() {
     if (!running) return;
 
-    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawPlayer();
     drawBlocks();
 
@@ -148,10 +184,7 @@ function loop() {
             b.y < player.y + player.r &&
             b.y + b.s > player.y - player.r
         ) {
-            hitSound.play();
-            running = false;
-            alert("Game Over\nScore: " + score);
-            location.reload();
+            endGame();
         }
     });
 
