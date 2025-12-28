@@ -123,3 +123,10 @@ footer {
     gap: 20px;
   }
 }
+
+
+.game-icon {
+  font-size: 42px;
+  margin-bottom: 10px;
+  filter: drop-shadow(0 0 10px rgba(0,234,255,0.6));
+}
